@@ -98,13 +98,16 @@
     </div>
 
     <script>
+        // Ensure jsPDF is accessible
+        const { jsPDF } = window.jspdf;
+
         // Update the name dynamically
         function updateName() {
             const userName = document.getElementById('userName').value;
             document.getElementById('certificateName').textContent = userName;
         }
 
-        // Download as PDF
+        // Download as PDF (Updated to ensure graphics are captured reliably)
         function downloadPDF() {
             const element = document.getElementById('certificate');
             // Ensure images are loaded before rendering
@@ -112,23 +115,26 @@
                 if (img.complete) return Promise.resolve();
                 return new Promise(resolve => { img.onload = img.onerror = resolve; });
             })).then(() => {
-                html2canvas(element, { scale: 2 }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-                    const { jsPDF } = window.jspdf;
+                html2canvas(element, { 
+                    scale: 2,
+                    useCORS: true, // Handle cross-origin images
+                    logging: false
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
                     const pdf = new jsPDF({
                         orientation: 'landscape',
                         unit: 'in',
                         format: 'letter'
                     });
-                    const imgProps = pdf.getImageProperties(imgData);
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = pdf.internal.pageSize.getHeight();
                     const imgWidth = 11; // Certificate width in inches
-                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-                    const x = (pdfWidth - imgWidth) / 2; // Center horizontally
-                    const y = (pdfHeight - imgHeight) / 2; // Center vertically
-                    pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+                    const imgHeight = 8.5; // Certificate height in inches
+                    const x = (pdf.internal.pageSize.getWidth() - imgWidth) / 2; // Center horizontally
+                    const y = (pdf.internal.pageSize.getHeight() - imgHeight) / 2; // Center vertically
+                    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
                     pdf.save('GoForth_Leadership_Certificate.pdf');
+                }).catch(error => {
+                    console.error('Error generating PDF:', error);
+                    alert('Failed to generate PDF. Please try again.');
                 });
             });
         }
@@ -138,20 +144,51 @@
             window.print();
         }
 
-        // Share the certificate (generate PNG and include link in email)
+        // Share the certificate (Updated to use a backend API for sending PDF)
         function shareCertificate() {
             const element = document.getElementById('certificate');
-            const userName = document.getElementById('userName').value || '[Your Name]';
-            // Ensure images are loaded
+            const email = prompt('Enter recipient email:');
+            if (!email) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            // Ensure images are loaded before generating the PDF
             Promise.all(Array.from(element.querySelectorAll('img')).map(img => {
                 if (img.complete) return Promise.resolve();
                 return new Promise(resolve => { img.onload = img.onerror = resolve; });
             })).then(() => {
-                html2canvas(element, { scale: 2 }).then(canvas => {
+                html2canvas(element, { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                }).then(canvas => {
                     const imgData = canvas.toDataURL('image/png');
-                    const subject = encodeURIComponent('My Go-Forth Leadership Certificate of Completion');
-                    const body = encodeURIComponent(`Hi,\n\nI just completed the Go-Forth Leadership Development Course! Click the link below to view my certificate:\n\n${imgData}\n\n(Note: Right-click the link and select "Save link as..." to download the certificate as a PNG. Alternatively, you can download the PDF from the certificate page and attach it manually.)\n\nBest,\n${userName}`);
-                    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                    const pdf = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'in',
+                        format: 'letter'
+                    });
+                    const imgWidth = 11;
+                    const imgHeight = 8.5;
+                    const x = (pdf.internal.pageSize.getWidth() - imgWidth) / 2;
+                    const y = (pdf.internal.pageSize.getHeight() - imgHeight) / 2;
+                    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+                    const pdfBlob = pdf.output('blob');
+
+                    // Create a FormData object to send the PDF to the backend
+                    const formData = new FormData();
+                    formData.append('pdf', pdfBlob, 'GoForth_Leadership_Certificate.pdf');
+                    formData.append('email', email);
+
+                    // Send the PDF to the backend API
+                    fetch('http://localhost:3000/send-certificate', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(result => alert(result))
+                    .catch(error => alert('Error sending email: ' + error));
                 });
             });
         }
