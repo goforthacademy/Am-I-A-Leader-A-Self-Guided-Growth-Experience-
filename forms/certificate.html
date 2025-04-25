@@ -6,7 +6,7 @@
     <title>Go-Forth Leadership Certificate of Completion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap" rel="stylesheet">
     <style>
         @media print {
             body * {
@@ -29,63 +29,36 @@
         }
         .certificate-border {
             border-left: 2px solid #666;
-            height: 100px;
-        }
-        .wave {
-            width: 100%;
-            height: 20px;
-            background: linear-gradient(to right, #8B1C2A 50%, transparent 50%);
-            background-size: 40px 20px;
+            height: 150px;
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl text-center">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Generate Your Go-Forth Leadership Certificate</h1>
-        <div class="mb-6">
-            <label for="userName" class="block text-sm font-medium text-gray-700 mb-2">Enter Your Name</label>
-            <input type="text" id="userName" placeholder="Your Name" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 mx-auto">
-        </div>
 
         <!-- Certificate Preview -->
-        <div id="certificate" class="p-6 bg-white relative" style="width: 11in; height: 8.5in;">
-            <!-- Logo -->
-            <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/GFLALogo.png" alt="Go-Forth Leadership Academy Logo" class="mx-auto w-1/2 h-auto mb-4">
+        <div id="certificate" class="p-10 bg-white relative" style="width: 11in; height: 8.5in;">
+            <!-- Header -->
+            <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/newheader.png" alt="Header with Logo and Waves" class="mx-auto w-full h-auto mb-8">
             
             <!-- Title -->
-            <h2 class="text-5xl font-bold maroon mb-8" style="font-family: 'Times New Roman', serif;">Certificate of Completion</h2>
+            <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/certificateofcomplete.png" alt="Certificate of Completion Title" class="mx-auto max-w-2xl h-auto mb-12">
 
             <!-- Main Content -->
-            <div class="flex items-center justify-center mb-6">
-                <div class="flex flex-col items-center mr-4">
-                    <p class="text-sm font-bold maroon transform -rotate-90" style="font-family: Arial, sans-serif;">This is to Proudly Certify That:</p>
-                    <div class="certificate-border mt-2"></div>
+            <div class="flex items-center justify-center mb-10">
+                <div class="flex flex-col items-start mr-8">
+                    <p class="text-base font-bold maroon mb-2" style="font-family: 'Raleway', sans-serif;">This is to Proudly Certify That:</p>
+                    <div class="certificate-border"></div>
                 </div>
                 <div class="text-center">
-                    <h3 id="certificateName" class="text-2xl font-semibold maroon border-b-2 border-gray-300 inline-block mb-4" style="font-family: 'Times New Roman', serif; min-width: 300px;">____________________</h3>
-                    <p class="text-md text-gray-700 mb-2" style="font-family: Arial, sans-serif;">has successfully completed the</p>
-                    <p class="text-2xl font-bold maroon mb-4" style="font-family: 'Times New Roman', serif;">Introduction to Leadership Development Program</p>
-                    <p class="text-sm text-gray-700 max-w-md mx-auto" style="font-family: Arial, sans-serif;">In recognition of your commitment to self-growth, team leadership, and the Go-Forth way. Through intentional reflection, courageous feedback, and a willingness to lead with integrity, you demonstrate the mindset and habits of a future-ready leader. Your growth strengthens our culture. Your leadership shapes the future.</p>
+                    <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/body.png" alt="Body with Name Line and Text" class="mx-auto max-w-3xl h-auto">
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="absolute bottom-6 w-full flex justify-between px-6">
-                <!-- Footer Logos (Placeholder) -->
-                <div class="text-left">
-                    <div class="wave mb-2"></div>
-                    <p class="text-sm text-gray-500" style="font-family: Arial, sans-serif;">[Go-Forth | CarolinaCore | Go-Forth Services]</p>
-                    <div class="wave mt-2"></div>
-                </div>
-                <!-- Date -->
-                <div class="text-center">
-                    <p class="text-sm text-gray-700 border-t-2 border-gray-300 inline-block pt-1" style="font-family: Arial, sans-serif;">Completion Date: <span id="certificateDate">April 25, 2025</span></p>
-                </div>
-                <!-- Signature (Placeholder) -->
-                <div class="text-right">
-                    <p class="text-lg maroon" style="font-family: 'Dancing Script', cursive;">Gary S. Corns</p>
-                    <p class="text-sm text-gray-700" style="font-family: Arial, sans-serif;">Chief Development & Brand Officer<br>Go-Forth Companies</p>
-                </div>
+            <div class="absolute bottom-6 w-full px-10">
+                <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/newfooter.png" alt="Footer with Waves and Logos" class="w-full h-auto">
             </div>
         </div>
 
@@ -98,23 +71,12 @@
     </div>
 
     <script>
-        // Update name in real-time
-        document.getElementById('userName').addEventListener('input', function() {
-            const name = this.value || '____________________';
-            document.getElementById('certificateName').textContent = name;
-        });
-
-        // Set today's date
-        const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        document.getElementById('certificateDate').textContent = today;
-
         // Download as PDF
         function downloadPDF() {
             const element = document.getElementById('certificate');
-            const userName = document.getElementById('userName').value || 'Recipient';
             const opt = {
                 margin: 0,
-                filename: `GoForth_Leadership_Certificate_${userName}.pdf`,
+                filename: `GoForth_Leadership_Certificate.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
@@ -129,9 +91,8 @@
 
         // Share the certificate (basic email share)
         function shareCertificate() {
-            const userName = document.getElementById('userName').value || 'Recipient';
             const subject = encodeURIComponent('My Go-Forth Leadership Certificate of Completion');
-            const body = encodeURIComponent(`Hi,\n\nI just completed the Go-Forth Leadership Development Course! Check out my certificate.\n\n(Note: Please download the certificate as a PDF to share it directly.)\n\nBest,\n${userName}`);
+            const body = encodeURIComponent(`Hi,\n\nI just completed the Go-Forth Leadership Development Course! Check out my certificate.\n\n(Note: Please download the certificate as a PDF to share it directly.)\n\nBest,\n[Your Name]`);
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
     </script>
