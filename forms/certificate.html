@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Go-Forth Leadership Certificate of Completion</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap" rel="stylesheet">
     <style>
         @media print {
@@ -19,12 +20,14 @@
                 position: absolute;
                 left: 0;
                 top: 0;
+                padding: 0 !important;
             }
             .no-print {
                 display: none;
             }
             @page {
                 size: landscape;
+                margin: 0;
             }
         }
         .certificate-container {
@@ -104,14 +107,30 @@
         // Download as PDF
         function downloadPDF() {
             const element = document.getElementById('certificate');
-            const opt = {
-                margin: 0,
-                filename: `GoForth_Leadership_Certificate.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
-            };
-            html2pdf().set(opt).from(element).save();
+            // Ensure images are loaded before rendering
+            Promise.all(Array.from(element.querySelectorAll('img')).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => { img.onload = img.onerror = resolve; });
+            })).then(() => {
+                html2canvas(element, { scale: 2 }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'in',
+                        format: 'letter'
+                    });
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const imgWidth = 11; // Certificate width in inches
+                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+                    const x = (pdfWidth - imgWidth) / 2; // Center horizontally
+                    const y = (pdfHeight - imgHeight) / 2; // Center vertically
+                    pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+                    pdf.save('GoForth_Leadership_Certificate.pdf');
+                });
+            });
         }
 
         // Print the certificate
@@ -119,12 +138,22 @@
             window.print();
         }
 
-        // Share the certificate (basic email share)
+        // Share the certificate (generate PNG and include link in email)
         function shareCertificate() {
+            const element = document.getElementById('certificate');
             const userName = document.getElementById('userName').value || '[Your Name]';
-            const subject = encodeURIComponent('My Go-Forth Leadership Certificate of Completion');
-            const body = encodeURIComponent(`Hi,\n\nI just completed the Go-Forth Leadership Development Course! Check out my certificate.\n\n(Note: Please download the certificate as a PDF to share it directly.)\n\nBest,\n${userName}`);
-            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            // Ensure images are loaded
+            Promise.all(Array.from(element.querySelectorAll('img')).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => { img.onload = img.onerror = resolve; });
+            })).then(() => {
+                html2canvas(element, { scale: 2 }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const subject = encodeURIComponent('My Go-Forth Leadership Certificate of Completion');
+                    const body = encodeURIComponent(`Hi,\n\nI just completed the Go-Forth Leadership Development Course! Click the link below to view my certificate:\n\n${imgData}\n\n(Note: Right-click the link and select "Save link as..." to download the certificate as a PNG. Alternatively, you can download the PDF from the certificate page and attach it manually.)\n\nBest,\n${userName}`);
+                    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                });
+            });
         }
     </script>
 </body>
