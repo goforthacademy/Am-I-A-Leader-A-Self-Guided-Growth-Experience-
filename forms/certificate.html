@@ -63,12 +63,12 @@
         <!-- Certificate Preview -->
         <div id="certificate" class="pt-0 px-10 pb-10 bg-white relative inline-block" style="width: 11in; height: 8.5in;">
             <!-- Header -->
-            <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/newheader.png" alt="Header with Logo and Waves" class="mx-auto w-full h-auto mb-4">
+            <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/newheader.png" alt="Header with Logo and Waves" class="mx-auto w-full h-auto mb-4" crossorigin="anonymous">
             
             <!-- Main Content -->
             <div class="text-center mb-4">
                 <!-- Certificate of Completion -->
-                <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/certificateofcomplete.png" alt="Certificate of Completion Title" class="mx-auto max-w-4xl h-auto mb-1" onerror="this.style.display='none'; document.getElementById('certificateFallback').style.display='block';">
+                <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/certificateofcomplete.png" alt="Certificate of Completion Title" class="mx-auto max-w-4xl h-auto mb-1" onerror="this.style.display='none'; document.getElementById('certificateFallback').style.display='block';" crossorigin="anonymous">
                 <div id="certificateFallback" style="display: none;">
                     <p class="text-5xl font-bold maroon mb-1" style="font-family: 'Palatino', 'Palatino Linotype', serif;">Certificate of Completion</p>
                     <p class="text-base font-bold maroon mb-1" style="font-family: 'Raleway', sans-serif;">This is to Proudly Certify That:</p>
@@ -80,12 +80,12 @@
                 </div>
 
                 <!-- Body -->
-                <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/body.png" alt="Body with Text" class="mx-auto w-full h-auto">
+                <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/body.png" alt="Body with Text" class="mx-auto w-full h-auto" crossorigin="anonymous">
             </div>
 
             <!-- Footer -->
             <div class="absolute bottom-0 w-full px-10">
-                <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/newfooter.png" alt="Footer with Waves and Logos" class="w-full h-auto">
+                <img src="https://raw.githubusercontent.com/goforthacademy/Am-I-A-Leader-A-Self-Guided-Growth-Experience-/main/forms/newfooter.png" alt="Footer with Waves and Logos" class="w-full h-auto" crossorigin="anonymous">
             </div>
         </div>
     </div>
@@ -93,8 +93,8 @@
     <!-- Action Buttons -->
     <div class="mt-6 flex justify-center space-x-4 no-print w-full max-w-4xl">
         <button onclick="downloadPDF()" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Download as PDF</button>
+        <button onclick="downloadPNG()" class="bg-blue-800 text-white py-2 px-4 rounded-md hover:bg-blue-900">Download as PNG</button>
         <button onclick="printCertificate()" class="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700">Print</button>
-        <button onclick="shareCertificate()" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">Share</button>
     </div>
 
     <script>
@@ -107,14 +107,21 @@
             document.getElementById('certificateName').textContent = userName;
         }
 
-        // Download as PDF (Updated to ensure graphics are captured reliably)
+        // Ensure all images are loaded before rendering
+        function waitForImages(element) {
+            return Promise.all(Array.from(element.querySelectorAll('img')).map(img => {
+                if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.onload = () => resolve();
+                    img.onerror = () => resolve(); // Proceed even if an image fails to load
+                });
+            }));
+        }
+
+        // Download as PDF
         function downloadPDF() {
             const element = document.getElementById('certificate');
-            // Ensure images are loaded before rendering
-            Promise.all(Array.from(element.querySelectorAll('img')).map(img => {
-                if (img.complete) return Promise.resolve();
-                return new Promise(resolve => { img.onload = img.onerror = resolve; });
-            })).then(() => {
+            waitForImages(element).then(() => {
                 html2canvas(element, { 
                     scale: 2,
                     useCORS: true, // Handle cross-origin images
@@ -134,7 +141,28 @@
                     pdf.save('GoForth_Leadership_Certificate.pdf');
                 }).catch(error => {
                     console.error('Error generating PDF:', error);
-                    alert('Failed to generate PDF. Please try again.');
+                    alert('Failed to generate PDF. Please try downloading as PNG instead.');
+                });
+            });
+        }
+
+        // Download as PNG
+        function downloadPNG() {
+            const element = document.getElementById('certificate');
+            waitForImages(element).then(() => {
+                html2canvas(element, { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = imgData;
+                    link.download = 'GoForth_Leadership_Certificate.png';
+                    link.click();
+                }).catch(error => {
+                    console.error('Error generating PNG:', error);
+                    alert('Failed to generate PNG. Please try again.');
                 });
             });
         }
@@ -142,55 +170,6 @@
         // Print the certificate
         function printCertificate() {
             window.print();
-        }
-
-        // Share the certificate (Updated to use a backend API for sending PDF)
-        function shareCertificate() {
-            const element = document.getElementById('certificate');
-            const email = prompt('Enter recipient email:');
-            if (!email) {
-                alert('Please enter a valid email address.');
-                return;
-            }
-
-            // Ensure images are loaded before generating the PDF
-            Promise.all(Array.from(element.querySelectorAll('img')).map(img => {
-                if (img.complete) return Promise.resolve();
-                return new Promise(resolve => { img.onload = img.onerror = resolve; });
-            })).then(() => {
-                html2canvas(element, { 
-                    scale: 2,
-                    useCORS: true,
-                    logging: false
-                }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jsPDF({
-                        orientation: 'landscape',
-                        unit: 'in',
-                        format: 'letter'
-                    });
-                    const imgWidth = 11;
-                    const imgHeight = 8.5;
-                    const x = (pdf.internal.pageSize.getWidth() - imgWidth) / 2;
-                    const y = (pdf.internal.pageSize.getHeight() - imgHeight) / 2;
-                    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-                    const pdfBlob = pdf.output('blob');
-
-                    // Create a FormData object to send the PDF to the backend
-                    const formData = new FormData();
-                    formData.append('pdf', pdfBlob, 'GoForth_Leadership_Certificate.pdf');
-                    formData.append('email', email);
-
-                    // Send the PDF to the backend API
-                    fetch('http://localhost:3000/send-certificate', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.text())
-                    .then(result => alert(result))
-                    .catch(error => alert('Error sending email: ' + error));
-                });
-            });
         }
     </script>
 </body>
